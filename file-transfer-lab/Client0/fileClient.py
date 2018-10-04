@@ -11,12 +11,11 @@ def sendFile(fileName,socket):
     with open(fileName, 'rb') as file:
         data = file.read(100)
         #sent = socket.send(data)
-        framedSend(socket, data, debug)
         while data != b"":
             #data = data[sent:]
+            framedSend(socket, data, debug)
             data = file.read(100)
             #sent = socket.send(data)
-            framedSend(socket, data, debug)
 
 server = "127.0.0.1:50000"
 debug  = True
@@ -52,19 +51,22 @@ if s is None:
     print('could not open socket')
     sys.exit(1)
 
-userInput = input("$ ") # to put file in format "$ put file.txt"
-if userInput.startswith("put"):
-    fileName = userInput.replace("put ", "")
-    #s.send(userInput.encode())
-    framedSend(s, userInput.encode(), debug)
-    #data = s.recv(100).decode()
-    data = framedReceive(s, debug).decode()
-    if data == 'EXISTS':
-        userInput = input("Replace File (Y/N)?")
-        if userInput == 'Y':
-            sendFile(fileName,s)
+userInput = ""
+while userInput != "exit":
+    userInput = input("$ ")
+    if userInput.startswith("put"):
+        fileName = userInput.replace("put ", "")
+        if os.path.isfile(fileName):
+            framedSend(s, userInput.encode(), debug)
+            data = framedReceive(s, debug).decode()
+            if data == 'EXISTS':
+                userInput = input("Replace File (Y/N)?")
+                if userInput == 'Y':
+                    sendFile(fileName,s)
+                else:
+                    #s.send(b"STOP")
+                    framedSend(s, b"STOP", debug)
+            else:
+                sendFile(fileName,s)
         else:
-            #s.send(b"STOP")
-            framedSend(s, b"STOP", debug)
-    else:
-        sendFile(fileName,s)
+            print(fileName + " doesn't exist")

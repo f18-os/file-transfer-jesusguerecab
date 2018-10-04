@@ -13,14 +13,12 @@ Once Server is running the client code asks for an input:
 7. The file is sent 100 bits at a time till the full file is sent
 8. At any moment the server can handle another client connecting
 
-This lab contains the following files:
- /Server/
- * fileServer.py: the server code
- * framedSock.py: the code that handles recieving and sending data for server
- /Client0/
- * fileClient.py: the clients code
- * framedSock.py: the code that handles recieving and sending data for client (same as server allows for relocation of client0)
- * file.txt: a text file to test sending
+This lab contains the following files
+ * Server/fileServer.py: the server code
+ * Server/framedSock.py: the code that handles recieving and sending data for server
+ * Clien0/fileClient.py: the clients code
+ * Client0/framedSock.py: the code that handles recieving and sending data for client (same as server allows for relocation of client0)
+ * Client0/file.txt: a text file to test sending
  
 
 To run Server (from \file-transfer-lab\Server\):
@@ -28,7 +26,7 @@ To run Server (from \file-transfer-lab\Server\):
 $ ./filServer.py
 ~~~
 
-To run SClient (from \file-transfer-lab\Client0):
+To run Client (from \file-transfer-lab\Client0):
 ~~~
 $ ./filClient.py
 ~~~

@@ -6,16 +6,12 @@ import socket, sys, re, os
 from framedSock import framedSend, framedReceive
 
 def sendFile(fileName,socket):
-    #socket.send(b'OK:' + str(os.path.getsize(fileName)).encode())
     framedSend(socket, b'OK:' + str(os.path.getsize(fileName)).encode(), debug)
     with open(fileName, 'rb') as file:
         data = file.read(100)
-        #sent = socket.send(data)
         while data != b"":
-            #data = data[sent:]
             framedSend(socket, data, debug)
             data = file.read(100)
-            #sent = socket.send(data)
 
 server = "127.0.0.1:50000"
 debug  = True
@@ -58,13 +54,12 @@ while userInput != "exit":
         fileName = userInput.replace("put ", "")
         if os.path.isfile(fileName):
             framedSend(s, userInput.encode(), debug)
-            data = framedReceive(s, debug).decode()
-            if data == 'EXISTS':
+            file = framedReceive(s, debug).decode()
+            if file == 'EXISTS':
                 userInput = input("Replace File (Y/N)?")
                 if userInput == 'Y':
                     sendFile(fileName,s)
                 else:
-                    #s.send(b"STOP")
                     framedSend(s, b"STOP", debug)
             else:
                 sendFile(fileName,s)

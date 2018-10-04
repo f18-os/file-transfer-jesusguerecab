@@ -27,30 +27,37 @@ s.bind(bindAddr)
 s.listen(5)
 print("listening on:", bindAddr)
 
-sock, addr = s.accept()
-print("connection rec'd from", addr)
-
 while True:
-    #payload = sock.recv(100).decode()
-    payload = framedReceive(sock, debug)
-    print(type(payload))
-    if payload is not None:
-        payload = payload.decode()
-        if payload[:3] == "put":
-            fileName = payload.replace("put ", "")
-            if os.path.isfile(fileName):
-                #sock.send(b'EXISTS')
-                framedSend(sock, b'EXISTS', debug)
-                #payload = sock.recv(100).decode()
-                payload = framedReceive(sock, debug).decode()
-                print(payload)
-                if payload[:3] == 'OK:':
+    sock, addr = s.accept()
+    rc = os.fork()
+    if rc < 0:
+        os.write(2, ("fork failed, returning %d\n" % rc).encode())
+        sys.exit(1)
+    elif rc != 0: #Parent goes to next iteration
+        continue
+    #Child
+    print("connection rec'd from", addr)
+    while True:
+        #payload = sock.recv(100).decode()
+        payload = framedReceive(sock, debug)
+        print(type(payload))
+        if payload is not None:
+            payload = payload.decode()
+            if payload[:3] == "put":
+                fileName = payload.replace("put ", "")
+                if os.path.isfile(fileName):
+                    #sock.send(b'EXISTS')
+                    framedSend(sock, b'EXISTS', debug)
+                    #payload = sock.recv(100).decode()
+                    payload = framedReceive(sock, debug).decode()
+                    print(payload)
+                    if payload[:3] == 'OK:':
+                        recieveFile(fileName,sock,payload[3:])
+                else:
+                    #sock.send(b'NO')
+                    framedSend(sock, b'NO', debug)
+                    #payload = sock.recv(100).decode()
+                    payload = framedReceive(sock, debug).decode()
                     recieveFile(fileName,sock,payload[3:])
-            else:
-                #sock.send(b'NO')
-                framedSend(sock, b'NO', debug)
-                #payload = sock.recv(100).decode()
-                payload = framedReceive(sock, debug).decode()
-                recieveFile(fileName,sock,payload[3:])
-    if not payload:
-        break 
+        if not payload:
+            break 
